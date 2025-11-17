@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Modern, clean styles -->
+    <style>
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #ffffff;
+            --bg-soft: #f8fafc;
+            --primary: #4f46e5;
+            --primary-soft: rgba(79, 70, 229, 0.08);
+            --accent: #ec4899;
+            --text-main: #0f172a;
+            --text-muted: #6b7280;
+            --border-subtle: #e2e8f0;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.28);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1d2538 0, #020617 50%, #020617 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: var(--text-main);
+        }
+
+        .profile-container {
+            width: 100%;
+            max-width: 1120px;
+            background: linear-gradient(135deg, #020617 0, #020617 40px, #0b1120 40px, #0b1120 100px, #020617 100px);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+
+        /* Top nav */
+        .profile-nav {
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.6), transparent 55%);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e5e7eb;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top, #4f46e5, #1e293b);
+            color: #e5e7eb;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.7);
+        }
+
+        .brand-text {
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            font-size: 18px;
+        }
+
+        .btn-logout {
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            padding: 8px 18px;
+            background: rgba(15, 23, 42, 0.5);
+            color: #e5e7eb;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(12px);
+        }
+
+        .btn-logout:hover {
+            background: rgba(248, 113, 113, 0.1);
+            border-color: #fca5a5;
+            color: #fee2e2;
+            transform: translateY(-1px);
+        }
+
+        .btn-logout:disabled {
+            opacity: 0.6;
+            cursor: default;
+            transform: none;
+        }
+
+        .profile-main {
+            padding: 0 24px 24px;
+            background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.2), transparent 55%);
+        }
+
+        /* Loading / error states */
+        .loading-state {
+            min-height: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #e5e7eb;
+        }
+
+        .spinner-large {
+            width: 52px;
+            height: 52px;
+            border-radius: 999px;
+            border: 4px solid rgba(148, 163, 184, 0.4);
+            border-top-color: #6366f1;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        .loading-state p {
+            font-size: 15px;
+            color: #9ca3af;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hero area */
+        .profile-hero {
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+            border-radius: var(--radius-lg);
+            background: radial-gradient(circle at top left, #4f46e5 0, #1d4ed8 35%, #0f172a 70%, #020617 100%);
+            padding: 24px 24px 80px;
+        }
+
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at top left, rgba(251, 113, 133, 0.85), transparent 55%),
+                radial-gradient(circle at top right, rgba(129, 140, 248, 0.85), transparent 55%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+        }
+
+        .avatar-circle {
+            width: 84px;
+            height: 84px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #4f46e5, #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #e5e7eb;
+            border: 3px solid rgba(15, 23, 42, 0.7);
+            overflow: hidden;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
+        }
+
+        .avatar-status {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: #22c55e;
+            border: 2px solid #020617;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+
+        .profile-name {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+
+        .profile-email {
+            margin: 4px 0 10px;
+            font-size: 14px;
+            color: #e5e7eb;
+            opacity: 0.85;
+        }
+
+        .profile-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.18);
+            color: #a7f3d0;
+            border: 1px solid rgba(16, 185, 129, 0.55);
+        }
+
+        .badge-primary {
+            background: rgba(59, 130, 246, 0.18);
+            color: #bfdbfe;
+            border: 1px solid rgba(59, 130, 246, 0.55);
+        }
+
+        /* Cards grid */
+        .cards-grid {
+            margin-top: -48px;
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-card {
+            background: radial-gradient(circle at top, rgba(15, 23, 42, 0.92) 0, rgba(15, 23, 42, 0.98) 50%, #020617 100%);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 18px 16px 16px;
+            color: #e5e7eb;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.6);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f9fafb;
+            font-size: 18px;
+        }
+
+        .card-icon-purple {
+            background: radial-gradient(circle at top, #a855f7, #4c1d95);
+        }
+
+        .card-icon-blue {
+            background: radial-gradient(circle at top, #3b82f6, #1d4ed8);
+        }
+
+        .card-icon-pink {
+            background: radial-gradient(circle at top, #f97316, #ea580c);
+        }
+
+        .card-icon-indigo {
+            background: radial-gradient(circle at top, #6366f1, #4338ca);
+        }
+
+        .card-body {
+            border-top: 1px solid rgba(51, 65, 85, 0.9);
+            padding-top: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .info-row + .info-row {
+            border-top: 1px dashed rgba(51, 65, 85, 0.7);
+        }
+
+        .info-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #9ca3af;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #e5e7eb;
+            word-break: break-all;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .status-active {
+            background: rgba(22, 163, 74, 0.16);
+            color: #bbf7d0;
+            border: 1px solid rgba(22, 163, 74, 0.6);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 14px;
+            padding: 10px 12px;
+            border: 1px solid rgba(51, 65, 85, 0.9);
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon-green {
+            background: radial-gradient(circle at top, #34d399, #15803d);
+            color: #ecfdf5;
+        }
+
+        .stat-icon-orange {
+            background: radial-gradient(circle at top, #fb923c, #c2410c);
+            color: #fffbeb;
+        }
+
+        .stat-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Actions */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .action-btn {
+            flex: 1 1 100px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            padding: 7px 12px;
+            background: rgba(15, 23, 42, 0.75);
+            color: #e5e7eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.18s ease;
+        }
+
+        .action-btn:hover {
+            border-color: #6366f1;
+            background: rgba(79, 70, 229, 0.12);
+            transform: translateY(-1px);
+        }
+
+        /* Simple primary button style (for error state back link) */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #f9fafb;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Responsive */
+        @media (max-width: 720px) {
+            body {
+                padding: 14px;
+            }
+
+            .profile-container {
+                border-radius: 18px;
+            }
+
+            .profile-main {
+                padding: 0 16px 16px;
+            }
+
+            .profile-hero {
+                padding: 18px 16px 70px;
+            }
+
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cards-grid {
+                margin-top: -36px;
+            }
+
+            .info-card {
+                padding: 14px 12px 12px;
+            }
+
+            .nav-content {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .btn-logout {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <nav class="profile-nav">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <div class="brand-icon">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <span class="brand-text">My Profile</span>
+                </div>
+                <button id="logout-btn" class="btn-logout">
+                    <span class="btn-text">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Logout
+                    </span>
+                </button>
+            </div>
+        </nav>
+
+        <div id="loading-state" class="profile-main">
+            <div class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Loading your profile...</p>
+            </div>
+        </div>
+
+        <div id="error-state" class="profile-main" style="display: none;">
+            <div class="loading-state">
+                <div style="font-size: 64px; color: #f87171; margin-bottom: 20px;">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <h2 style="color: #f9fafb; font-size: 24px; margin-bottom: 12px;">Error Loading Profile</h2>
+                <p id="error-message" style="color: #9ca3af; margin-bottom: 24px;"></p>
+                <a href="login.html" class="btn btn-primary" style="text-decoration: none;">
+                    <i class="bi bi-arrow-left"></i>
+                    Back to Login
+                </a>
+            </div>
+        </div>
+
+        <div id="profile-content" class="profile-main" style="display: none;">
+            <div class="profile-hero">
+                <div class="hero-gradient"></div>
+                <div class="hero-content">
+                    <div class="avatar-wrapper">
+                        <div class="avatar-circle" id="avatar"></div>
+                        <div class="avatar-status"></div>
+                    </div>
+                    <div>
+                        <h1 class="profile-name" id="user-name"></h1>
+                        <p class="profile-email" id="user-email"></p>
+                        <div class="profile-badges">
+                            <span class="badge badge-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Active Account
+                            </span>
+                            <span class="badge badge-primary" id="google-badge" style="display: none;">
+                                <i class="bi bi-google"></i>
+                                Google Authenticated
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon card-icon-purple">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <h2>Account Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-hash"></i>
+                                User ID
+                            </span>
+                            <span class="info-value" id="user-id"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-shield-check"></i>
+                                Status
+                            </span>
+                            <span class="status-badge status-active">Active</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-calendar-check"></i>
+                                Member Since
+                            </span>
+                            <span class="info-value" id="member-since"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon card-icon-blue">
+                            <i class="bi bi-key"></i>
+                        </div>
+                        <h2>Authentication Details</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-envelope"></i>
+                                Email Verified
+                            </span>
+                            <span class="info-value" id="email-verified">
+                                <i class="bi bi-check-circle-fill" style="color: #48bb78;"></i>
+                            </span>
+                        </div>
+                        <div class="info-row" id="google-id-row" style="display: none;">
+                            <span class="info-label">
+                                <i class="bi bi-google"></i>
+                                Google ID
+                            </span>
+                            <span class="info-value" id="google-id"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">
+                                <i class="bi bi-clock-history"></i>
+                                Last Updated
+                            </span>
+                            <span class="info-value" id="last-updated"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon card-icon-pink">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h2>Account Statistics</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-icon stat-icon-green">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-value" id="days-active">0</div>
+                                    <div class="stat-label">Days Active</div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon stat-icon-orange">
+                                    <i class="bi bi-activity"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <div class="stat-value">100%</div>
+                                    <div class="stat-label">Profile Complete</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-icon card-icon-indigo">
+                            <i class="bi bi-lightning"></i>
+                        </div>
+                        <h2>Quick Actions</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="alert('Edit profile feature coming soon!')">
+                                <i class="bi bi-pencil-square"></i>
+                                <span>Edit Profile</span>
+                            </button>
+                            <button class="action-btn" onclick="alert('Security settings coming soon!')">
+                                <i class="bi bi-shield-lock"></i>
+                                <span>Security Settings</span>
+                            </button>
+                            <button class="action-btn" onclick="alert('Download data feature coming soon!')">
+                                <i class="bi bi-download"></i>
+                                <span>Download My Data</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Update this to match your Laravel API URL
+        const API_BASE_URL = 'http://localhost:8000/api';
+        
+        const token = localStorage.getItem('api_token');
+        const storedUser = localStorage.getItem('user');
+
+        console.log('Token:', token ? 'Present' : 'Missing');
+        console.log('Stored User:', storedUser ? 'Present' : 'Missing');
+
+        // Redirect to login if no token
+        if (!token) {
+            console.log('No token found, redirecting to login...');
+            window.location.href = 'login.html';
+        }
+
+        // Load user profile
+        async function loadProfile() {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const profileContent = document.getElementById('profile-content');
+
+            // Try to use stored user data first (from localStorage)
+            if (storedUser) {
+                try {
+                    const user = JSON.parse(storedUser);
+                    console.log('Using stored user data:', user);
+                    displayUserProfile(user);
+                    loadingState.style.display = 'none';
+                    profileContent.style.display = 'block';
+                    
+                    // Still fetch fresh data in background
+                    fetchFreshUserData();
+                    return;
+                } catch (e) {
+                    console.error('Error parsing stored user:', e);
+                }
+            }
+
+            // If no stored user, fetch from API
+            await fetchFreshUserData();
+        }
+
+        // Fetch fresh user data from API
+        async function fetchFreshUserData() {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const profileContent = document.getElementById('profile-content');
+
+            try {
+                console.log('Fetching user data from:', `${API_BASE_URL}/user`);
+                
+                const response = await fetch(`${API_BASE_URL}/user`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('Response status:', response.status);
+
+                if (response.ok) {
+                    const user = await response.json();
+                    console.log('User data received:', user);
+                    
+                    // Store fresh user data
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    displayUserProfile(user);
+                    loadingState.style.display = 'none';
+                    profileContent.style.display = 'block';
+                } else if (response.status === 401) {
+                    throw new Error('Your session has expired. Please login again.');
+                } else {
+                    const errorData = await response.text();
+                    console.error('API Error:', errorData);
+                    throw new Error('Failed to load profile. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                
+                // If we have stored user data, show it even if API fails
+                if (storedUser && profileContent.style.display === 'block') {
+                    console.log('API failed but showing cached data');
+                    return;
+                }
+                
+                loadingState.style.display = 'none';
+                errorState.style.display = 'block';
+                document.getElementById('error-message').textContent = error.message;
+
+                if (error.message.includes('session has expired')) {
+                    localStorage.removeItem('api_token');
+                    localStorage.removeItem('user');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                }
+            }
+        }
+
+        // Display user profile information
+        function displayUserProfile(user) {
+            console.log('Displaying user profile:', user);
+            
+            // Avatar logic (already working)
+            if (user.avatar) {
+                const avatarElement = document.getElementById('avatar');
+                avatarElement.style.backgroundImage = `url(${user.avatar})`;
+                avatarElement.style.backgroundSize = 'cover';
+                avatarElement.style.backgroundPosition = 'center';
+                avatarElement.textContent = '';
+            } else {
+                const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                document.getElementById('avatar').textContent = initial;
+            }
+            
+            document.getElementById('user-name').textContent = user.name || 'Unknown User';
+            document.getElementById('user-email').textContent = user.email || '';
+            document.getElementById('user-id').textContent = user.id || '';
+
+            // Show Google badge and details if user has google_id
+            if (user.google_id) {
+                document.getElementById('google-badge').style.display = 'inline-flex';
+                document.getElementById('google-id-row').style.display = 'flex';
+                const googleId = user.google_id.toString();
+                const displayId = googleId.length > 20 ? googleId.substring(0, 20) + '...' : googleId;
+                document.getElementById('google-id').textContent = displayId;
+            }
+
+            // Format and display dates
+            if (user.created_at) {
+                const createdDate = new Date(user.created_at);
+                const formattedDate = createdDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                document.getElementById('member-since').textContent = formattedDate;
+
+                // Calculate days active
+                const today = new Date();
+                const daysActive = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                document.getElementById('days-active').textContent = daysActive;
+            }
+
+            if (user.updated_at) {
+                const updatedDate = new Date(user.updated_at);
+                const formattedDate = updatedDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                document.getElementById('last-updated').textContent = formattedDate;
+            }
+
+            // Set email verified icon
+            if (user.email_verified_at) {
+                document.getElementById('email-verified').innerHTML =
+                    '<i class="bi bi-check-circle-fill" style="color: #48bb78; font-size: 20px;"></i>';
+            } else {
+                document.getElementById('email-verified').innerHTML =
+                    '<i class="bi bi-x-circle-fill" style="color: #f56565; font-size: 20px;"></i>';
+            }
+        }
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            const logoutBtn = document.getElementById('logout-btn');
+            const originalContent = logoutBtn.innerHTML;
+            logoutBtn.disabled = true;
+            logoutBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Logging out...';
+
+            try {
+                await fetch(`${API_BASE_URL}/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('Logged out successfully');
+            } catch (error) {
+                console.error('Error during logout:', error);
+            } finally {
+                // Always clear local storage and redirect
+                localStorage.removeItem('api_token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Load profile on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, loading profile...');
+            loadProfile();
+        });
+    </script>
+</body>
+</html>
