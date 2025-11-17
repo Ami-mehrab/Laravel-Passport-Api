@@ -1,16 +1,17 @@
-Laravel Passport API is a backend API project built with Laravel 12, using Laravel Passport for robust OAuth2 authentication. It provides a standard email/password registration and login system, as well as social authentication with Google and GitHub using Laravel Socialite.Authenticated users can access protected endpoints, such as viewing their own user profile. The entire API is designed to be consumed by a frontend application or tested thoroughly using an API client like Postman.FeaturesLaravel Passport: Uses OAuth2 for secure API authentication.Standard Auth: Endpoints for user registration, login, and logout with email/password.Social Authentication: Login/register with:GoogleGitHubProfile Management: Authenticated endpoint to fetch the user's profile.Token-Based: Returns a Passport access token upon successful authentication.Postman Ready: All endpoints are configured for testing via Postman.PrerequisitesBefore you begin, ensure you have the following installed:PHP >= 8.1ComposerA database (e.g., MySQL, PostgreSQL, SQLite)Postman (for testing)Installation & SetupClone the repository:git clone [https://github.com/your-username/Laravel-Passport-Api.git](https://github.com/your-username/Laravel-Passport-Api.git)
+****Laravel Passport API****
+A secure, token-based backend API built with Laravel 12 and Passport, providing robust OAuth2 authentication. This project includes standard email/password login, as well as social auth integration for Google and GitHub.FeaturesSecure OAuth2 Auth: Powered by Laravel Passport for token-based authentication.Standard Authentication: Full-featured registration, login, and logout endpoints.Socialite Integration: Seamless login and registration with Google and GitHub.Protected Routes: Example API endpoint for fetching the authenticated user's profile.Postman-Ready: Fully tested and designed for consumption via API clients like Postman.Tech StackFramework: Laravel 12Authentication: Laravel PassportSocial Auth: Laravel SocialiteDatabase: MySQL, PostgreSQL, etc. (via Eloquent)API Testing: PostmanGetting StartedFollow these instructions to get a local copy up and running for development and testing.PrerequisitesPHP >= 8.1ComposerA compatible database (MySQL, PostgreSQL, etc.)InstallationClone the repository:git clone [https://github.com/your-username/Laravel-Passport-Api.git](https://github.com/your-username/Laravel-Passport-Api.git)
 cd Laravel-Passport-Api
 Install dependencies:composer install
-Create your environment file:cp .env.example .env
-Generate application key:php artisan key:generate
-Configure your .env file:Update the following variables in your .env file.Database:DB_CONNECTION=mysql
+Setup environment:cp .env.example .env
+php artisan key:generate
+Configure .env:Update your .env file with your database credentials and application URL.DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
 DB_DATABASE=laravel_passport_api
 DB_USERNAME=root
 DB_PASSWORD=your_db_password
-App URL:APP_URL=http://localhost:8000
-Socialite Credentials:You must get developer credentials from Google and GitHub.# Google Credentials
+
+APP_URL=http://localhost:8000
+Socialite Configuration:Add your Google and GitHub OAuth credentials to your .env file. The redirect URIs must match these values.# Google Credentials
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_REDIRECT_URI=${APP_URL}/api/auth/google/callback
@@ -19,32 +20,32 @@ GOOGLE_REDIRECT_URI=${APP_URL}/api/auth/google/callback
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
 GITHUB_REDIRECT_URI=${APP_URL}/api/auth/github/callback
-Note: When creating your credentials, make sure the authorized redirect URIs match what you have in your .env file (e.g., http://localhost:8000/api/auth/google/callback).Run database migrations:php artisan migrate
-Install Laravel Passport:This command will create encryption keys and the "Password Grant Client" for standard email/password login.php artisan passport:install
-After running this, take note of the Password grant client ID and secret. You will need these for Postman. They are usually id: 2.Start the server:php artisan serve
-Your API will be running at http://localhost:8000.API Endpoints & Postman TestingYou can import this project's routes into Postman, or test them manually as described below.Headers: For all authenticated requests, you must include:Authorization: Bearer YOUR_ACCESS_TOKENAccept: application/json1. Standard AuthenticationRegisterEndpoint: POST /api/auth/registerBody: raw (JSON){
+Database Migration:php artisan migrate
+Passport Installation:This command creates the necessary encryption keys and Password Grant Client.php artisan passport:install
+Note the client_id (usually 2) and client_secret for the "Password grant client" for testing.Run the server:php artisan serve
+The API will be accessible at http://localhost:8000.API EndpointsAll requests require an Accept: application/json header. Protected routes require an Authorization: Bearer YOUR_ACCESS_TOKEN header.1. Standard AuthenticationPOST /api/auth/registerRegisters a new user.<details><summary>Click to see Request Body</summary>{
     "name": "Test User",
     "email": "test@example.com",
     "password": "password123",
     "password_confirmation": "password123"
 }
-Login (Get Access Token)This endpoint uses the Passport /oauth/token route.Endpoint: POST /oauth/tokenBody: x-www-form-urlencodedgrant_type: passwordclient_id: 2 (Or the ID of your 'Password grant client' from oauth_clients table)client_secret: Your_password_grant_client_secretusername: test@example.compassword: password123Response:{
+</details>POST /oauth/tokenLogs in a user (password grant) and returns an access token.<details><summary>Click to see Request Body (x-www-form-urlencoded)</summary>grant_type: passwordclient_id: 2 (Your password grant client ID)client_secret: Your_password_grant_client_secretusername: test@example.compassword: password123</details><details><summary>Click to see Success Response</summary>{
     "token_type": "Bearer",
     "expires_in": 31536000,
     "access_token": "...",
     "refresh_token": "..."
 }
-LogoutEndpoint: POST /api/auth/logoutAuth: Bearer Token (Paste your access_token)Response: 200 OK with a "Logged out" message.2. Social Authentication (Google & GitHub)The OAuth flow is browser-based. You cannot test the full social auth flow directly in Postman.Step 1: Get Redirect URLEndpoint:GET /api/auth/google/redirectGET /api/auth/github/redirectAction: Open one of these URLs in your browser (not Postman).Response: You will be redirected to Google or GitHub to authorize the application.Step 2: Handle CallbackEndpoint:GET /api/auth/google/callbackGET /api/auth/github/callbackAction: After authorizing in your browser, you will be redirected to this callback URL. The API will process the request, create/log in the user, and return a JSON response containing the access token.Response (in browser):{
+</details>POST /api/auth/logout (Protected)Logs out the authenticated user and revokes their token.2. Social AuthenticationThis flow is browser-based.GET /api/auth/{provider}/redirect (e.g., /api/auth/google/redirect)Redirects the user to the provider's OAuth authorization page.GET /api/auth/{provider}/callback (e.g., /api/auth/google/callback)Handles the callback from the provider. On success, it returns a JSON response with the user data and a new Passport access token.<details><summary>Click to see Success Response (in browser)</summary>{
     "message": "Login successful",
     "user": {
         "id": 3,
         "name": "Social User",
         "email": "social@gmail.com",
-        ...
+        "..." : "..."
     },
     "token": "your_new_access_token_..."
 }
-Step 3: Use the Token in PostmanCopy the token from the JSON response in your browser.Go back to Postman.You can now use this token to access protected routes.3. Protected RoutesGet User ProfileEndpoint: GET /api/userAuth: Bearer Token (Paste your access_token from either the standard login or social auth flow).Response:{
+</details>3. Protected RoutesGET /api/user (Protected)Fetches the profile of the currently authenticated user.<details><summary>Click to see Success Response</summary>{
     "id": 1,
     "name": "Test User",
     "email": "test@example.com",
@@ -52,4 +53,4 @@ Step 3: Use the Token in PostmanCopy the token from the JSON response in your br
     "created_at": "2023-10-27T00:00:00.000000Z",
     "updated_at": "2023-10-27T00:00:00.000000Z"
 }
-LicenseThis project is open-sourced software licensed under the MIT license.
+</details>ContributingContributions are welcome! If you have suggestions for improvements, please fork the repo and create a pull request, or open an issue with the "enhancement" tag.Fork the ProjectCreate your Feature Branch (git checkout -b feature/AmazingFeature)Commit your Changes (git commit -m 'Add some AmazingFeature')Push to the Branch (git push origin feature/AmazingFeature)Open a Pull RequestLicenseThis project is open-sourced software licensed under the MIT license.
